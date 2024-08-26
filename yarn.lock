@@ -965,6 +965,11 @@ http-errors@2.0.0:
     statuses "2.0.1"
     toidentifier "1.0.1"
 
+husky@^9.1.5:
+  version "9.1.5"
+  resolved "https://registry.yarnpkg.com/husky/-/husky-9.1.5.tgz#2b6edede53ee1adbbd3a3da490628a23f5243b83"
+  integrity sha512-rowAVRUBfI0b4+niA4SJMhfQwc107VLkBUgEYYAOQAbqDCnra1nYh83hF/MDmhYs9t9n1E3DuKOrs2LYNC+0Ag==
+
 iconv-lite@0.4.24:
   version "0.4.24"
   resolved "https://registry.yarnpkg.com/iconv-lite/-/iconv-lite-0.4.24.tgz#2022b4b25fbddc21d2f524974a474aafe733908b"
