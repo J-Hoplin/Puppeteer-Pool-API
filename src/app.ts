@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
+import router from './routes';
 
 const server: Application = express();
 
@@ -14,5 +15,7 @@ server.use(
 server.get('/', (req, res) => {
   res.send('Hello World!');
 });
+
+server.use(router);
 
 startServer(server);
