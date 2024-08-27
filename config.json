@@ -1,0 +1,16 @@
+{
+  "application": {
+    "port": 5200,
+    "memory": 1024
+  },
+  "browser_pool": {
+    "min": 2,
+    "max": 5,
+    "width": 1080,
+    "height": 1024
+  },
+  "session_pool": {
+    "min": 3,
+    "max": 5
+  }
+}
