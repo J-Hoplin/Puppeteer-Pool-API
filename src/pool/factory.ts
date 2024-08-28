@@ -1,4 +1,4 @@
-import puppeteer, { LaunchOptions } from 'puppeteer';
+import puppeteer, { PuppeteerLaunchOptions } from 'puppeteer';
 import genericPool, { Pool } from 'generic-pool';
 import { config } from '../internal/config';
 import { logger } from '../internal/logger';
@@ -6,6 +6,7 @@ import { SinglePool } from './pool';
 import dayjs from 'dayjs';
 import { sessionCallback } from './type';
 import { PoolNotInitializedException, SessionCallbackException } from './error';
+import { enablePageCaching, ignoreResourceLoading } from './options';
 
 // Pool Instance
 let pools: Pool<any> = null;
@@ -15,14 +16,32 @@ let browserPoolId = 1;
 
 async function sessionPoolFactory(
   poolId: number,
-  puppeteerConfig: LaunchOptions = {},
+  puppeteerConfig: PuppeteerLaunchOptions = {},
+  ignoreResourceLoad = false,
+  enablePageCache = false,
 ) {
   let sessionCounter = 1;
-  const browser = await puppeteer.launch(puppeteerConfig);
+  const browser = await puppeteer.launch({
+    ...puppeteerConfig,
+    headless: true,
+  });
   const sessionPool = genericPool.createPool(
     {
       create: async () => {
         const page = await browser.newPage();
+        await page.setViewport({
+          width: config.session_pool.width,
+          height: config.session_pool.height,
+        });
+
+        // Speedy Text Scrape option
+        if (ignoreResourceLoad) {
+          await ignoreResourceLoading(page);
+        }
+        if (enablePageCache) {
+          await enablePageCaching(page);
+        }
+
         const sessionId = sessionCounter++;
         logger.info(
           `Creating session pool --- Session ID: ${poolId}_${sessionId}`,
@@ -50,7 +69,12 @@ async function poolFactory() {
       create: async () => {
         const id = browserPoolId++;
         logger.info(`Creating browser pool --- Pool ID: ${id}`);
-        const pool = await sessionPoolFactory(id);
+        const pool = await sessionPoolFactory(
+          id,
+          {},
+          config.session_pool.ignoreResourceLoad,
+          config.session_pool.enablePageCache,
+        );
         return { pool, id };
       },
       destroy: async ({ pool, id }) => {

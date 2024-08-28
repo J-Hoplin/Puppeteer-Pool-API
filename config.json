@@ -5,12 +5,14 @@
   },
   "browser_pool": {
     "min": 2,
-    "max": 5,
-    "width": 1080,
-    "height": 1024
+    "max": 5
   },
   "session_pool": {
-    "min": 3,
-    "max": 5
+    "min": 1,
+    "max": 5,
+    "width": 100,
+    "height": 100,
+    "ignoreResourceLoad": true,
+    "enablePageCache": true
   }
 }
