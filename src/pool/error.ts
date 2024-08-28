@@ -1,9 +1,9 @@
 /**
  * Exception for pool not initialized
  */
-export class PoolNotInitializedException extends Error {
+export class PoolManagerNotInitializedException extends Error {
   constructor() {
-    super('Pool not initialized! Please initialize pool first!');
+    super('Pool manager not initialized! Please boot pool manager first!');
     this.name = 'PoolNotInitializedException';
   }
 }

@@ -1,6 +1,7 @@
 import { RequestHandler } from 'express';
 import { responseFn } from '../common/response';
 import * as process from 'node:process';
+import { getPoolMetrics } from '../pool/factory';
 
 function transformBytesToGB(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2);
@@ -10,7 +11,12 @@ export const healthCheckController: RequestHandler = (req, res) => {
   return responseFn(res, 200, 'OK');
 };
 
-export const processMetricCheckController: RequestHandler = (req, res) => {
+export const processMetricCheckController: RequestHandler = async (
+  req,
+  res,
+) => {
+  const puppeteerPoolMetrics = await getPoolMetrics();
+
   const proctorTimeOutMS = 100;
   const memoryUsage = process.memoryUsage();
   const startCPUUsage = process.cpuUsage();
@@ -42,6 +48,7 @@ export const processMetricCheckController: RequestHandler = (req, res) => {
       v8_heap_used: `${heapUsed} GB`,
       v8_external: `${external} GB`,
       cpu_usage: `${cpuUsagePercent.toFixed(2)}%`,
+      pool: puppeteerPoolMetrics,
     };
     return responseFn(res, 200, response);
   }, proctorTimeOutMS);

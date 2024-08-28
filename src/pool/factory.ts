@@ -5,154 +5,224 @@ import { logger } from '../internal/logger';
 import { SinglePool } from './pool';
 import dayjs from 'dayjs';
 import { sessionCallback } from './type';
-import { PoolNotInitializedException, SessionCallbackException } from './error';
+import {
+  PoolManagerNotInitializedException,
+  SessionCallbackException,
+} from './error';
 import { enablePageCaching, ignoreResourceLoading } from './options';
+import pidusage from 'pidusage';
 
-// Pool Instance
-let pools: Pool<any> = null;
+let managerInstance: PuppeteerPoolManager = null;
 
-// Browser Pool ID
-let browserPoolId = 1;
-
-async function sessionPoolFactory(
-  poolId: number,
-  puppeteerConfig: PuppeteerLaunchOptions = {},
-  ignoreResourceLoad = false,
-  enablePageCache = false,
+/**
+ * Create new puppeteer pool manager
+ *
+ * Invoke boot method
+ */
+export async function bootPoolManager(
+  puppeteerOptions: PuppeteerLaunchOptions = {},
 ) {
-  let sessionCounter = 1;
-  const browser = await puppeteer.launch({
-    ...puppeteerConfig,
-    headless: true,
-  });
-  const sessionPool = genericPool.createPool(
-    {
-      create: async () => {
-        const page = await browser.newPage();
-        await page.setViewport({
-          width: config.session_pool.width,
-          height: config.session_pool.height,
-        });
-
-        // Speedy Text Scrape option
-        if (ignoreResourceLoad) {
-          await ignoreResourceLoading(page);
-        }
-        if (enablePageCache) {
-          await enablePageCaching(page);
-        }
-
-        const sessionId = sessionCounter++;
-        logger.info(
-          `Creating session pool --- Session ID: ${poolId}_${sessionId}`,
-        );
-        return { page, sessionId };
-      },
-      destroy: async ({ page, sessionId }) => {
-        logger.info(
-          `Destroying session pool --- Session ID: ${poolId}_${sessionId}`,
-        );
-        await page.close();
-      },
-    },
-    {
-      max: config.session_pool.max,
-      min: config.session_pool.min,
-    },
-  );
-  return new SinglePool(poolId, browser, sessionPool);
-}
-
-async function poolFactory() {
-  pools = genericPool.createPool(
-    {
-      create: async () => {
-        const id = browserPoolId++;
-        logger.info(`Creating browser pool --- Pool ID: ${id}`);
-        const pool = await sessionPoolFactory(
-          id,
-          {},
-          config.session_pool.ignoreResourceLoad,
-          config.session_pool.enablePageCache,
-        );
-        return { pool, id };
-      },
-      destroy: async ({ pool, id }) => {
-        logger.info(`Destroying browser pool --- Pool ID: ${id}`);
-        await pool.close();
-      },
-    },
-    {
-      max: config.browser_pool.max,
-      min: config.browser_pool.min,
-    },
-  );
+  managerInstance = new PuppeteerPoolManager();
+  await managerInstance.boot(puppeteerOptions);
 }
 
 /**
- * Intialize Pool
  *
- * - Set pool instance
- * - Add signal shutdown
+ * Issue session and run user's callback function
+ *
+ * throw exception if pool manager is not initialized
  */
-export async function initializePool() {
-  await poolFactory();
-  const targetSignals = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
-  targetSignals.forEach((signal) => {
-    process.on(signal, () => {
-      const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
-      logger.info(
-        `${now} --- Signal received(${signal}) - Terminating puppeteer pool`,
-      );
-      (async () => {
-        await pools.drain();
-        await pools.clear();
-      })();
-    });
-  });
+export async function controlSession(cb: sessionCallback) {
+  if (managerInstance === null) {
+    throw new PoolManagerNotInitializedException();
+  }
+  return await managerInstance.issueSession(cb);
 }
 
-export async function controlSession(cb: sessionCallback) {
-  // If pool not initialized
-  if (!pools) {
-    throw new PoolNotInitializedException();
+/**
+ * Get entire metrics of pools which manager is managing
+ *
+ * throw exception if pool manager is not initialized
+ */
+export async function getPoolMetrics() {
+  if (managerInstance === null) {
+    throw new PoolManagerNotInitializedException();
   }
-  // resource type: {pool,id}
+  return await managerInstance.getPoolMetrics();
+}
+
+class PuppeteerPoolManager {
+  // Pool Instance
+  private pools: Pool<any> = null;
+
+  // Browser Pool ID - Increment
+  private browserPoolId = 1;
+
+  // Map: pid: browser process id
+  private puppeteerPIDMap: Map<number, number> = new Map();
+
   /**
-   * Resource type
-   * {
-   *  pool: SinglePool,
-   *  id: number
-   * }
+   * Manager Booter - Browser Pool Factory
    *
+   * Enroll signal handler for graceful shutdown
    */
-  const resource = await pools.acquire();
-  const singlePool = resource.pool;
-  let isSuccess = true;
-  let exception = null;
-  let callbackReturn = null;
-  try {
+  async boot(options: PuppeteerLaunchOptions) {
+    this.pools = genericPool.createPool(
+      {
+        create: async () => {
+          const id = this.browserPoolId++;
+          logger.info(`Creating browser pool --- Pool ID: ${id}`);
+          const pool = await this.sessionPoolFactory(
+            id,
+            {},
+            config.session_pool.ignoreResourceLoad,
+            config.session_pool.enablePageCache,
+          );
+          return { pool, id };
+        },
+        destroy: async ({ pool, id }) => {
+          this.puppeteerPIDMap.delete(id);
+          logger.info(`Destroying browser pool --- Pool ID: ${id}`);
+          await pool.close();
+        },
+      },
+      {
+        max: config.browser_pool.max,
+        min: config.browser_pool.min,
+      },
+    );
+    const targetSignals = ['SIGINT', 'SIGTERM', 'SIGQUIT'];
+    targetSignals.forEach((signal) => {
+      process.on(signal, () => {
+        const now = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        logger.info(
+          `${now} --- Signal received(${signal}) - Terminating puppeteer pool`,
+        );
+        for (const [poolId, pid] of this.puppeteerPIDMap) {
+          const poolAlias = `POOL_${poolId}(PID: ${pid})`;
+          try {
+            process.kill(pid, 'SIGTERM');
+            logger.info(`${poolAlias} successfully terminated`);
+          } catch (err) {
+            logger.error(`${poolAlias} termination failed`);
+          }
+        }
+        process.exit(0);
+      });
+    });
+  }
+
+  /**
+   * Session Pool Facotory
+   */
+  async sessionPoolFactory(
+    poolId: number,
+    puppeteerConfig: PuppeteerLaunchOptions = {},
+    ignoreResourceLoad = false,
+    enablePageCache = false,
+  ) {
+    let sessionCounter = 1;
+    const browser = await puppeteer.launch({
+      ...puppeteerConfig,
+      headless: true,
+    });
+    const browserProcessId = browser.process().pid;
+
+    // Enroll PID of puppeteer process when browser is created
+    this.puppeteerPIDMap.set(poolId, browserProcessId);
+    const sessionPool = genericPool.createPool(
+      {
+        create: async () => {
+          const page = await browser.newPage();
+          await page.setViewport({
+            width: config.session_pool.width,
+            height: config.session_pool.height,
+          });
+
+          // Speedy Text Scrape option
+          if (ignoreResourceLoad) {
+            await ignoreResourceLoading(page);
+          }
+          if (enablePageCache) {
+            await enablePageCaching(page);
+          }
+
+          const sessionId = sessionCounter++;
+          logger.info(
+            `Creating session pool --- Session ID: ${poolId}_${sessionId}`,
+          );
+          return { page, sessionId };
+        },
+        destroy: async ({ page, sessionId }) => {
+          logger.info(
+            `Destroying session pool --- Session ID: ${poolId}_${sessionId}`,
+          );
+          await page.close();
+        },
+      },
+      {
+        max: config.session_pool.max,
+        min: config.session_pool.min,
+      },
+    );
+    return new SinglePool(poolId, browser, sessionPool);
+  }
+
+  async issueSession(cb: sessionCallback) {
     /**
-     * sessionPoolResource type
+     * Resource type
      * {
-     *   page: Page,
-     *   sessionId: number
+     *  pool: SinglePool,
+     *  id: number
      * }
      *
      */
-    const sessionPoolResource = await singlePool.acquireSession();
-    callbackReturn = await cb(sessionPoolResource.page);
-    await singlePool.releaseSession(sessionPoolResource);
-  } catch (err) {
-    isSuccess = false;
-    exception = new SessionCallbackException(
-      (err as Error)?.message ?? 'Unknown Exception',
-    );
+    const resource = await this.pools.acquire();
+    const singlePool = resource.pool;
+    let isSuccess = true;
+    let exception = null;
+    let callbackReturn = null;
+    try {
+      /**
+       * sessionPoolResource type
+       * {
+       *   page: Page,
+       *   sessionId: number
+       * }
+       *
+       */
+      const sessionPoolResource = await singlePool.acquireSession();
+      callbackReturn = await cb(sessionPoolResource.page);
+      await singlePool.releaseSession(sessionPoolResource);
+    } catch (err) {
+      isSuccess = false;
+      exception = new SessionCallbackException(
+        (err as Error)?.message ?? 'Unknown Exception',
+      );
+    }
+    await this.pools.release(resource);
+    if (isSuccess) {
+      return callbackReturn;
+    } else {
+      throw exception;
+    }
   }
-  await pools.release(resource);
-  if (isSuccess) {
-    return callbackReturn;
-  } else {
-    throw exception;
+
+  async getPoolMetrics() {
+    /**
+     * CPU Usage unit: %
+     * Memory Usage unit: GB
+     */
+    const response = {};
+    for (const [poolId, pid] of this.puppeteerPIDMap) {
+      const stats = await pidusage(pid);
+      const CPUUsage = stats.cpu.toFixed(2);
+      const MemoryUsage = stats.memory / 1024 / 1024 / 1024;
+      response[`POOL_${poolId}`] = {
+        CPU: `${CPUUsage}%`,
+        Memory: `${MemoryUsage.toFixed(2)}GB`,
+      };
+    }
+    return response;
   }
 }
