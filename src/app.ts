@@ -25,7 +25,7 @@ async function bootstrap() {
 
   server.post('/', async (req, res) => {
     const url = req.body.url;
-    const htmlContent = controlSession(async (session) => {
+    const htmlContent = await controlSession(async (session) => {
       await session.goto(url);
 
       return await session.content();
