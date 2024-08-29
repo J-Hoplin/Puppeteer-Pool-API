@@ -32,15 +32,6 @@ Reboot pool manager. **This api is not recommended to use. Using this API in run
 Return single session from pool. You need to pass callback function as parameter to use in session. This return result of callback function return value
 
 ```typescript
-{
-  CPU: "Percentage of CPU Usage",
-  Memory: "Memory Usage in GB",
-  SessionPoolCount: "Session count that Pool is managing"
-}
-
-```
-
-```typescript
 // Session Callback type
 import { Page } from 'puppeteer';
 
@@ -50,6 +41,15 @@ type sessionCallback = (page: Page) => Promise<any>;
 ### `getPoolMetrics():Promise<PoolMetrics>`
 
 Return pool metrics. This includes pool id, pool CPU Usage, Memory Usage
+
+```typescript
+{
+  CPU: "Percentage of CPU Usage",
+  Memory: "Memory Usage in GB",
+  SessionPoolCount: "Session count that Pool is managing"
+}
+
+```
 
 ## Usage Example
 
