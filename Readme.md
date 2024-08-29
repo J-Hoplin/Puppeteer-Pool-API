@@ -11,7 +11,7 @@
 - `GET /health/metrics`
   - GET application metrics and puppeteer pool metrics
 
-## Puppeteer Pool Manager apis (`src/pool/manager.ts`) 
+## Puppeteer Pool Manager apis (`src/pool/manager.ts`)
 
 **This directory will be deployed as single npm package**
 
@@ -43,18 +43,19 @@ Return pool metrics. This includes pool id, pool CPU Usage, Memory Usage
 Example of combining pool manager with Express Framework
 
 ```typescript
-
-import { bootPoolManager, controlSession, getPoolMetrics } from '(Manager Import path)';
+import {
+  bootPoolManager,
+  controlSession,
+  getPoolMetrics,
+} from '(Manager Import path)';
 
 async function bootstrap() {
-
   /**
    * Initialize Express Server
    */
 
   // Initialize pool
   await bootPoolManager();
-
 
   // Control Session example
   server.post('/', async (req, res) => {
@@ -65,7 +66,7 @@ async function bootstrap() {
       /**
        * Control session here
        */
-      return //(Some values)
+      return; //(Some values)
     });
     return res.status(200).json({ result: controlResponse });
   });

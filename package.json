@@ -29,6 +29,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "husky": "^9.1.5",
     "prettier": "^3.3.3",
+    "prettier-plugin-sort-imports": "^1.8.6",
     "tsc-watch": "^6.2.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.5.4"
