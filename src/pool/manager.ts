@@ -74,6 +74,11 @@ export async function getPoolMetrics() {
   return await managerInstance.getPoolMetrics();
 }
 
+type PIDMapValue = {
+  pid: number;
+  sessionPoolCount: number;
+};
+
 class PuppeteerPoolManager {
   // Pool Instance
   private pools: Pool<any> = null;
@@ -82,7 +87,7 @@ class PuppeteerPoolManager {
   private browserPoolId = 1;
 
   // Map: pid: browser process id
-  private puppeteerPIDMap: Map<number, number> = new Map();
+  private puppeteerPIDMap: Map<number, PIDMapValue> = new Map();
 
   /**
    * Manager Booter - Browser Pool Factory
@@ -121,7 +126,8 @@ class PuppeteerPoolManager {
         logger.info(
           `${now} --- Signal received(${signal}) - Terminating puppeteer pool`,
         );
-        for (const [poolId, pid] of this.puppeteerPIDMap) {
+        for (const [poolId, { pid, sessionPoolCount }] of this
+          .puppeteerPIDMap) {
           const poolAlias = `POOL_${poolId}(PID: ${pid})`;
           try {
             process.kill(pid, 'SIGTERM');
@@ -152,7 +158,10 @@ class PuppeteerPoolManager {
     const browserProcessId = browser.process().pid;
 
     // Enroll PID of puppeteer process when browser is created
-    this.puppeteerPIDMap.set(poolId, browserProcessId);
+    this.puppeteerPIDMap.set(poolId, {
+      pid: browserProcessId,
+      sessionPoolCount: 0,
+    });
     const sessionPool = genericPool.createPool(
       {
         create: async () => {
@@ -171,12 +180,14 @@ class PuppeteerPoolManager {
           }
 
           const sessionId = sessionCounter++;
+          this.changeSessionPoolState(poolId, 'increase');
           logger.info(
             `Creating session pool --- Session ID: ${poolId}_${sessionId}`,
           );
           return { page, sessionId };
         },
         destroy: async ({ page, sessionId }) => {
+          this.changeSessionPoolState(poolId, 'decrease');
           logger.info(
             `Destroying session pool --- Session ID: ${poolId}_${sessionId}`,
           );
@@ -189,6 +200,19 @@ class PuppeteerPoolManager {
       },
     );
     return new SinglePool(poolId, browser, sessionPool);
+  }
+
+  changeSessionPoolState(id: number, calculation: 'increase' | 'decrease') {
+    const pool = this.puppeteerPIDMap.get(id);
+    // If not found, ignore invoke
+    if (!pool) {
+      return;
+    }
+    if (calculation === 'increase') {
+      pool.sessionPoolCount++;
+    } else {
+      pool.sessionPoolCount--;
+    }
   }
 
   async issueSession(cb: sessionCallback) {
@@ -237,13 +261,14 @@ class PuppeteerPoolManager {
      * Memory Usage unit: GB
      */
     const response = {};
-    for (const [poolId, pid] of this.puppeteerPIDMap) {
+    for (const [poolId, { pid, sessionPoolCount }] of this.puppeteerPIDMap) {
       const stats = await pidusage(pid);
       const CPUUsage = stats.cpu.toFixed(2);
       const MemoryUsage = stats.memory / 1024 / 1024 / 1024;
       response[`POOL_${poolId}`] = {
         CPU: `${CPUUsage}%`,
         Memory: `${MemoryUsage.toFixed(2)}GB`,
+        SessionPoolCount: sessionPoolCount,
       };
     }
     return response;
@@ -269,6 +294,7 @@ export class SinglePool<T = any> {
   }
 
   public async releaseSession(session: T) {
+    logger.info(`Release session from --- Pool ID: ${this.poolId}`);
     return await this.pool.release(session);
   }
 

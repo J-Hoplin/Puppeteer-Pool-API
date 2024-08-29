@@ -8,7 +8,7 @@
     "max": 5
   },
   "session_pool": {
-    "min": 1,
+    "min": 3,
     "max": 5,
     "width": 100,
     "height": 100,
