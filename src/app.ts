@@ -4,7 +4,7 @@ import { startServer } from './internal/process';
 import router from './routes';
 import * as path from 'path';
 import { load } from './internal/config';
-import { initializePool, controlSession } from './pool/factory';
+import { bootPoolManager, controlSession } from './pool/manager';
 
 // Config Loading
 const configPath = path.resolve(__dirname, '../config.json');
@@ -12,7 +12,7 @@ load(configPath);
 
 async function bootstrap() {
   // Initialize pool
-  await initializePool();
+  await bootPoolManager();
 
   const server: Application = express();
 

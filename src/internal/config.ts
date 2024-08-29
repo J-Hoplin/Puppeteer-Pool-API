@@ -16,6 +16,10 @@ export const config = {
   session_pool: {
     min: 1,
     max: 5,
+    width: 1080,
+    height: 1024,
+    ignoreResourceLoad: false,
+    enablePageCache: false,
   },
 };
 
@@ -35,10 +39,6 @@ export const load = (configPath: string) => {
         loadedConfig?.browser_pool?.min ?? config.browser_pool.min;
       config.browser_pool.max =
         loadedConfig?.browser_pool?.max ?? config.browser_pool.max;
-      config.browser_pool.width =
-        loadedConfig?.browser_pool?.width ?? config.browser_pool.width;
-      config.browser_pool.height =
-        loadedConfig?.browser_pool?.height ?? config.browser_pool.height;
     }
     // Session Pool Config
     if (loadedConfig?.session_pool) {
@@ -46,6 +46,16 @@ export const load = (configPath: string) => {
         loadedConfig?.session_pool?.min ?? config.session_pool.min;
       config.session_pool.max =
         loadedConfig?.session_pool?.max ?? config.session_pool.max;
+      config.session_pool.width =
+        loadedConfig?.session_pool?.width ?? config.session_pool.width;
+      config.session_pool.height =
+        loadedConfig?.session_pool?.height ?? config.session_pool.height;
+      config.session_pool.ignoreResourceLoad =
+        loadedConfig?.session_pool?.ignoreResourceLoad ??
+        config.session_pool.ignoreResourceLoad;
+      config.session_pool.enablePageCache =
+        loadedConfig?.session_pool?.enablePageCache ??
+        config.session_pool.enablePageCache;
     }
     logger.info('Config loaded successfully');
   } catch (err) {
