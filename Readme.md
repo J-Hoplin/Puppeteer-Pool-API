@@ -10,4 +10,3 @@
   - Get ping
 - `GET /health/metrics`
   - GET application metrics and puppeteer pool metrics
-
