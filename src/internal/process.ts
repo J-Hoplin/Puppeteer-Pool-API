@@ -1,7 +1,7 @@
 import { Application } from 'express';
 import { logger } from './logger';
-import dayjs from 'dayjs';
 import { config } from './config';
+import dayjs from 'dayjs';
 
 export function startServer(
   server: Application,

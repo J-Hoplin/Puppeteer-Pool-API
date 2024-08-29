@@ -1,10 +1,10 @@
-import express, { Application } from 'express';
+import { bootPoolManager, controlSession } from './pool/manager';
 import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
+import express, { Application } from 'express';
+import { load } from './internal/config';
 import router from './routes';
 import * as path from 'path';
-import { load } from './internal/config';
-import { bootPoolManager, controlSession } from './pool/manager';
 
 // Config Loading
 const configPath = path.resolve(__dirname, '../config.json');

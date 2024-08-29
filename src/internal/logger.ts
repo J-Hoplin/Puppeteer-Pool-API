@@ -1,5 +1,5 @@
-import pino from 'pino';
 import { RequestHandler } from 'express';
+import pino from 'pino';
 
 const processId = process.pid;
 

@@ -1,5 +1,5 @@
-import * as fs from 'fs';
 import { logger } from './logger';
+import * as fs from 'fs';
 
 // Default Config
 export const config = {

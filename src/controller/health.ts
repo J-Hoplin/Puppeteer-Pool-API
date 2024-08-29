@@ -1,7 +1,7 @@
-import { RequestHandler } from 'express';
-import { responseFn } from '../common/response';
-import * as process from 'node:process';
 import { getPoolMetrics } from '../pool/manager';
+import { responseFn } from '../common/response';
+import { RequestHandler } from 'express';
+import * as process from 'node:process';
 
 function transformBytesToGB(bytes: number): string {
   return (bytes / 1024 / 1024 / 1024).toFixed(2);

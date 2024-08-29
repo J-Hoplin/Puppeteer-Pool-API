@@ -3,6 +3,4 @@
   "singleQuote": true,
   "trailingComma": "all",
   "tabWidth": 2,
-  "importOrderSeparation": true,
-  "importOrderSortSpecifiers": true
 }

@@ -1,15 +1,15 @@
-import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer';
-import genericPool, { Pool } from 'generic-pool';
-import { config } from '../internal/config';
-import { logger } from '../internal/logger';
-import dayjs from 'dayjs';
-import { sessionCallback } from './type';
 import {
   PoolManagerNotInitializedException,
   SessionCallbackException,
 } from './error';
+import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer';
 import { enablePageCaching, ignoreResourceLoading } from './options';
+import genericPool, { Pool } from 'generic-pool';
+import { config } from '../internal/config';
+import { logger } from '../internal/logger';
+import { sessionCallback } from './type';
 import pidusage from 'pidusage';
+import dayjs from 'dayjs';
 
 let managerInstance: PuppeteerPoolManager = null;
 

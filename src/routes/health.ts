@@ -1,8 +1,8 @@
-import { Router } from 'express';
 import {
   healthCheckController,
   processMetricCheckController,
 } from '../controller/health';
+import { Router } from 'express';
 
 export const router = Router();
 
