@@ -2,6 +2,10 @@
 
 **This readme is temporary document**
 
+<p align="center">
+  <img src="./diagram/diagram2.png" alt="Image description">
+</p>
+
 ## Routes
 
 - `POST /`
@@ -15,15 +19,15 @@
 
 **This directory will be deployed as single npm package**
 
-### `bootPoolManager`
+### `bootPoolManager():Promise<void>`
 
 Boot pool manager. **You need to invoke this function at least once to use another APIs**
 
-### `rebootPoolManager`
+### `rebootPoolManager():Promise<void>`
 
 Reboot pool manager. **This api is not recommended to use. Using this API in runtime may occur unintended process break**
 
-### `controlSession`
+### `controlSession(cb: sessionCallback):Promise<any>`
 
 Return single session from pool. You need to pass callback function as parameter to use in session. This return result of callback function return value
 
@@ -34,7 +38,7 @@ import { Page } from 'puppeteer';
 type sessionCallback = (page: Page) => Promise<any>;
 ```
 
-### `getPoolMetrics`
+### `getPoolMetrics():Promise<PoolMetrics>`
 
 Return pool metrics. This includes pool id, pool CPU Usage, Memory Usage
 
