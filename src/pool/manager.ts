@@ -1,8 +1,7 @@
-import puppeteer, { PuppeteerLaunchOptions } from 'puppeteer';
+import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer';
 import genericPool, { Pool } from 'generic-pool';
 import { config } from '../internal/config';
 import { logger } from '../internal/logger';
-import { SinglePool } from './pool';
 import dayjs from 'dayjs';
 import { sessionCallback } from './type';
 import {
@@ -254,5 +253,28 @@ class PuppeteerPoolManager {
     await this.pools.drain();
     await this.pools.clear();
     logger.info('Successfully terminated pool');
+  }
+}
+
+export class SinglePool<T = any> {
+  constructor(
+    private poolId: number,
+    private browser: Browser,
+    private pool: Pool<T>,
+  ) {}
+
+  public async acquireSession() {
+    logger.info(`Acquire session from --- Pool ID: ${this.poolId}`);
+    return await this.pool.acquire();
+  }
+
+  public async releaseSession(session: T) {
+    return await this.pool.release(session);
+  }
+
+  async close() {
+    await this.pool.drain();
+    await this.pool.clear();
+    await this.browser.close();
   }
 }
