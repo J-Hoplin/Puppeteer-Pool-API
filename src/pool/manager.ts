@@ -22,8 +22,32 @@ let managerInstance: PuppeteerPoolManager = null;
 export async function bootPoolManager(
   puppeteerOptions: PuppeteerLaunchOptions = {},
 ) {
+  /**
+   * Boot should be boot only once
+   */
+  if (managerInstance) {
+    logger.warn('Pool manager already booted. Ignore invoke signal');
+    return;
+  }
+  logger.info('Boot pool manager');
   managerInstance = new PuppeteerPoolManager();
   await managerInstance.boot(puppeteerOptions);
+}
+
+/**
+ * Reboot pool manager
+ *
+ * Warning: Not recommended
+ */
+export async function rebootPoolManager() {
+  logger.info('Reboot pool manager');
+  if (managerInstance) {
+    logger.info('Terminate current pool manager');
+    await managerInstance.terminatePool();
+    // Set instace to null
+    managerInstance = null;
+  }
+  await bootPoolManager();
 }
 
 /**
@@ -224,5 +248,11 @@ class PuppeteerPoolManager {
       };
     }
     return response;
+  }
+
+  async terminatePool() {
+    await this.pools.drain();
+    await this.pools.clear();
+    logger.info('Successfully terminated pool');
   }
 }

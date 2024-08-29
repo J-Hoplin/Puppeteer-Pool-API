@@ -4,7 +4,7 @@ import { startServer } from './internal/process';
 import router from './routes';
 import * as path from 'path';
 import { load } from './internal/config';
-import { bootPoolManager, controlSession } from './pool/factory';
+import { bootPoolManager, controlSession } from './pool/manager';
 
 // Config Loading
 const configPath = path.resolve(__dirname, '../config.json');
