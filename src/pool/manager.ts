@@ -3,10 +3,10 @@ import {
   SessionCallbackException,
 } from './error';
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer';
+import { MetadataMap, PoolMetricsType, sessionCallback } from './type';
 import { enablePageCaching, ignoreResourceLoading } from './options';
-import genericPool, { Pool } from 'generic-pool';
+import genericPool, { Factory, Pool } from 'generic-pool';
 import { poolLogger as logger } from './logger';
-import { sessionCallback } from './type';
 import { load } from './config';
 import pidusage from 'pidusage';
 import dayjs from 'dayjs';
@@ -77,11 +77,6 @@ export async function getPoolMetrics() {
   return await managerInstance.getPoolMetrics();
 }
 
-type PIDMapValue = {
-  pid: number;
-  sessionPoolCount: number;
-};
-
 class PuppeteerPoolManager {
   // Pool Instance
   private pools: Pool<any> = null;
@@ -90,7 +85,10 @@ class PuppeteerPoolManager {
   private browserPoolId = 1;
 
   // Map: pid: browser process id
-  private puppeteerPIDMap: Map<number, PIDMapValue> = new Map();
+  private poolMetadata: Map<number, MetadataMap> = new Map();
+
+  // Threshold Watcher ID
+  private thresholdWatcher: NodeJS.Timeout = null;
 
   /**
    * Manager Booter - Browser Pool Factory
@@ -105,14 +103,40 @@ class PuppeteerPoolManager {
           logger.info(`Creating browser pool --- Pool ID: ${id}`);
           const pool = await this.sessionPoolFactory(
             id,
-            {},
+            options,
             config.session_pool.ignoreResourceLoad,
             config.session_pool.enablePageCache,
           );
+          this.thresholdWatcher = setInterval(async () => {
+            const metrics = await this.getPoolMetrics();
+            for (const metric of metrics) {
+              const { CPU, Memory } = metric;
+              // CPU Threshold
+              if (CPU >= config.threshold.cpu.break) {
+                logger.error(
+                  `[Danger] CPU usage is over threshold --- Pool ID: ${id} --- CPU: ${CPU}%`,
+                );
+              } else if (CPU >= config.threshold.cpu.warn) {
+                logger.warn(
+                  `[Warn] CPU usage is over threshold --- Pool ID: ${id} --- CPU: ${CPU}%`,
+                );
+              }
+              // Memory Threshold
+              if (Memory >= config.threshold.memory.break) {
+                logger.error(
+                  `[Danger] Memory usage is over threshold --- Pool ID: ${id} --- Memory: ${Memory}GB`,
+                );
+              } else if (Memory >= config.threshold.memory.warn) {
+                logger.warn(
+                  `[Warn] Memory usage is over threshold --- Pool ID: ${id} --- Memory: ${Memory}GB`,
+                );
+              }
+            }
+          }, config.threshold.interval * 1000);
           return { pool, id };
         },
         destroy: async ({ pool, id }) => {
-          this.puppeteerPIDMap.delete(id);
+          this.poolMetadata.delete(id);
           logger.info(`Destroying browser pool --- Pool ID: ${id}`);
           await pool.close();
         },
@@ -129,8 +153,10 @@ class PuppeteerPoolManager {
         logger.info(
           `${now} --- Signal received(${signal}) - Terminating puppeteer pool`,
         );
-        for (const [poolId, { pid, sessionPoolCount }] of this
-          .puppeteerPIDMap) {
+        // Terminate threshold watcher
+        clearInterval(this.thresholdWatcher);
+        logger.info('Threshold watcher successfully terminated');
+        for (const [poolId, { pid, sessionPoolCount }] of this.poolMetadata) {
           const poolAlias = `POOL_${poolId}(PID: ${pid})`;
           try {
             process.kill(pid, 'SIGTERM');
@@ -159,11 +185,11 @@ class PuppeteerPoolManager {
       headless: true,
     });
     const browserProcessId = browser.process().pid;
-
     // Enroll PID of puppeteer process when browser is created
-    this.puppeteerPIDMap.set(poolId, {
+    this.poolMetadata.set(poolId, {
       pid: browserProcessId,
       sessionPoolCount: 0,
+      thresholdCheckerId: null,
     });
     const sessionPool = genericPool.createPool(
       {
@@ -206,7 +232,7 @@ class PuppeteerPoolManager {
   }
 
   changeSessionPoolState(id: number, calculation: 'increase' | 'decrease') {
-    const pool = this.puppeteerPIDMap.get(id);
+    const pool = this.poolMetadata.get(id);
     // If not found, ignore invoke
     if (!pool) {
       return;
@@ -258,21 +284,47 @@ class PuppeteerPoolManager {
     }
   }
 
-  async getPoolMetrics() {
+  async getPoolMetrics(id?: number): Promise<PoolMetricsType[]> {
     /**
      * CPU Usage unit: %
      * Memory Usage unit: GB
      */
-    const response = {};
-    for (const [poolId, { pid, sessionPoolCount }] of this.puppeteerPIDMap) {
-      const stats = await pidusage(pid);
-      const CPUUsage = stats.cpu.toFixed(2);
-      const MemoryUsage = stats.memory / 1024 / 1024 / 1024;
-      response[`POOL_${poolId}`] = {
-        CPU: `${CPUUsage}%`,
-        Memory: `${MemoryUsage.toFixed(2)}GB`,
-        SessionPoolCount: sessionPoolCount,
+    const response: PoolMetricsType[] = [];
+
+    const getStatCpuMemoryUsage = (stat) => {
+      const CPUUsage = stat.cpu.toFixed(2);
+      const MemoryUsage = (stat.memory / 1024 / 1024 / 1024).toFixed(2);
+      return {
+        cpu: parseFloat(CPUUsage),
+        memory: parseFloat(MemoryUsage),
       };
+    };
+
+    if (id) {
+      const metadata = this.poolMetadata.get(id);
+      if (!metadata) {
+        return response;
+      }
+      const { pid, sessionPoolCount } = metadata;
+      const stats = await pidusage(pid);
+      const { cpu, memory } = getStatCpuMemoryUsage(stats);
+      response.push({
+        Id: `POOL_${id}(PID: ${pid})`,
+        CPU: cpu,
+        Memory: memory,
+        SessionPoolCount: sessionPoolCount,
+      });
+    } else {
+      for (const [poolId, { pid, sessionPoolCount }] of this.poolMetadata) {
+        const stats = await pidusage(pid);
+        const { cpu, memory } = getStatCpuMemoryUsage(stats);
+        response.push({
+          Id: `POOL_${poolId}`,
+          CPU: cpu,
+          Memory: memory,
+          SessionPoolCount: sessionPoolCount,
+        });
+      }
     }
     return response;
   }

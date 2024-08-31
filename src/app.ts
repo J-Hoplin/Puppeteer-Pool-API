@@ -3,7 +3,6 @@ import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
 import express, { Application } from 'express';
 import router from './routes';
-import * as path from 'path';
 
 async function bootstrap() {
   // Initialize pool

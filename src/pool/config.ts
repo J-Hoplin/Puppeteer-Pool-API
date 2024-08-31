@@ -28,6 +28,17 @@ const config = {
     ignoreResourceLoad: false,
     enablePageCache: false,
   },
+  threshold: {
+    interval: 5,
+    cpu: {
+      break: 10,
+      warn: 5,
+    },
+    memory: {
+      break: 300,
+      warn: 200,
+    },
+  },
 };
 
 export const load = (configPath: string = null) => {
@@ -58,6 +69,26 @@ export const load = (configPath: string = null) => {
       config.session_pool.enablePageCache =
         loadedConfig?.session_pool?.enablePageCache ??
         config.session_pool.enablePageCache;
+    }
+    // Threshold Config
+    if (loadedConfig?.threshold) {
+      // Threshold Interval
+      config.threshold.interval =
+        loadedConfig.threshold.interval ?? config.threshold.interval;
+      // Threshold CPU config
+      if (loadedConfig.threshold?.cpu) {
+        config.threshold.cpu.break =
+          loadedConfig.threshold.cpu.break ?? config.threshold.cpu.break;
+        config.threshold.cpu.warn =
+          loadedConfig.threshold.cpu.warn ?? config.threshold.cpu.warn;
+      }
+      // Threshold Memory config
+      if (loadedConfig.threshold?.memory) {
+        config.threshold.memory.break =
+          loadedConfig.threshold.memory.break ?? config.threshold.memory.break;
+        config.threshold.memory.warn =
+          loadedConfig.threshold.memory.warn ?? config.threshold.memory.warn;
+      }
     }
     logger.info('Config loaded successfully');
   } catch (err) {
