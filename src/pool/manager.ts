@@ -109,26 +109,28 @@ class PuppeteerPoolManager {
           );
           this.thresholdWatcher = setInterval(async () => {
             const metrics = await this.getPoolMetrics();
+            const getOverRate = (metric, threshold) =>
+              parseFloat(((metric / threshold) * 100).toFixed(2));
             for (const metric of metrics) {
               const { CPU, Memory } = metric;
               // CPU Threshold
               if (CPU >= config.threshold.cpu.break) {
                 logger.error(
-                  `[Danger] CPU usage is over threshold --- Pool ID: ${id} --- CPU: ${CPU}%`,
+                  `[Danger] CPU usage is over threshold --- Pool ID: ${id} --- CPU: ${CPU}% (${getOverRate(CPU, config.threshold.cpu.warn)}%)`,
                 );
               } else if (CPU >= config.threshold.cpu.warn) {
                 logger.warn(
-                  `[Warn] CPU usage is over threshold --- Pool ID: ${id} --- CPU: ${CPU}%`,
+                  `[Warn] CPU usage is over threshold --- Pool ID: ${id} --- CPU: ${CPU}% (${getOverRate(CPU, config.threshold.cpu.warn)}%)`,
                 );
               }
               // Memory Threshold
               if (Memory >= config.threshold.memory.break) {
                 logger.error(
-                  `[Danger] Memory usage is over threshold --- Pool ID: ${id} --- Memory: ${Memory}GB`,
+                  `[Danger] Memory usage is over threshold --- Pool ID: ${id} --- Memory: ${Memory}MB (${getOverRate(Memory, config.threshold.memory.warn)}%)`,
                 );
               } else if (Memory >= config.threshold.memory.warn) {
                 logger.warn(
-                  `[Warn] Memory usage is over threshold --- Pool ID: ${id} --- Memory: ${Memory}GB`,
+                  `[Warn] Memory usage is over threshold --- Pool ID: ${id} --- Memory: ${Memory}MB (${getOverRate(Memory, config.threshold.memory.warn)}%)`,
                 );
               }
             }
@@ -293,7 +295,7 @@ class PuppeteerPoolManager {
 
     const getStatCpuMemoryUsage = (stat) => {
       const CPUUsage = stat.cpu.toFixed(2);
-      const MemoryUsage = (stat.memory / 1024 / 1024 / 1024).toFixed(2);
+      const MemoryUsage = (stat.memory / 1024 / 1024).toFixed(2);
       return {
         cpu: parseFloat(CPUUsage),
         memory: parseFloat(MemoryUsage),
