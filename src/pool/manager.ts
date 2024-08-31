@@ -6,8 +6,8 @@ import puppeteer, { Browser, Page, PuppeteerLaunchOptions } from 'puppeteer';
 import { enablePageCaching, ignoreResourceLoading } from './options';
 import genericPool, { Pool } from 'generic-pool';
 import { poolLogger as logger } from './logger';
-import { load } from './config';
 import pidusage from 'pidusage';
+import { load } from './config';
 import dayjs from 'dayjs';
 
 /**
@@ -350,6 +350,8 @@ class PuppeteerPoolManager {
      */
     const resource = await this.pools.acquire();
     const singlePool = resource.pool;
+    // Directly release Root Pool for handling next session pool
+    await this.pools.release(resource);
     let isSuccess = true;
     let exception = null;
     let callbackReturn = null;
@@ -371,7 +373,7 @@ class PuppeteerPoolManager {
         (err as Error)?.message ?? 'Unknown Exception',
       );
     }
-    await this.pools.release(resource);
+
     if (isSuccess) {
       return callbackReturn;
     } else {
