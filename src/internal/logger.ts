@@ -1,8 +1,6 @@
 import { RequestHandler } from 'express';
 import pino from 'pino';
 
-const processId = process.pid;
-
 // Logger Info
 const transport = pino.transport({
   targets: [

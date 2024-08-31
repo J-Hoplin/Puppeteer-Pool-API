@@ -1,13 +1,13 @@
 import { Application } from 'express';
 import { logger } from './logger';
-import { config } from './config';
+import { APP_PORT } from './env';
 import dayjs from 'dayjs';
 
 export function startServer(
   server: Application,
   enableGracefulShutdown = true,
 ) {
-  const port = config.application.port;
+  const port = APP_PORT;
   const serverProcess = server.listen(port, () => {
     logger.info(`Server listening on port ${port}`);
   });

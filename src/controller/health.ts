@@ -16,7 +16,6 @@ export const processMetricCheckController: RequestHandler = async (
   res,
 ) => {
   const puppeteerPoolMetrics = await getPoolMetrics();
-
   const proctorTimeOutMS = 100;
   const memoryUsage = process.memoryUsage();
   const startCPUUsage = process.cpuUsage();
@@ -48,7 +47,16 @@ export const processMetricCheckController: RequestHandler = async (
       v8_heap_used: `${heapUsed} GB`,
       v8_external: `${external} GB`,
       cpu_usage: `${cpuUsagePercent.toFixed(2)}%`,
-      pool: puppeteerPoolMetrics,
+      pool: puppeteerPoolMetrics.map((metrics) => {
+        const id = metrics.Id;
+        const cpu = `${metrics.CPU}%`;
+        const memory =
+          metrics.Memory > 1024
+            ? `${parseFloat((metrics.Memory / 1024).toFixed(2))}GB`
+            : `${metrics.Memory}MB`;
+        const sessionPoolCount = metrics.SessionPoolCount;
+        return { id, cpu, memory, sessionPoolCount };
+      }),
     };
     return responseFn(res, 200, response);
   }, proctorTimeOutMS);
