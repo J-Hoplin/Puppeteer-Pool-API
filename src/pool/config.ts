@@ -29,6 +29,7 @@ const config = {
     enablePageCache: false,
   },
   threshold: {
+    activate: true,
     interval: 5,
     cpu: {
       break: 10,
@@ -72,22 +73,24 @@ export const load = (configPath: string = null) => {
     }
     // Threshold Config
     if (loadedConfig?.threshold) {
+      config.threshold.activate =
+        loadedConfig.threshold?.activate ?? config.threshold.activate;
       // Threshold Interval
       config.threshold.interval =
-        loadedConfig.threshold.interval ?? config.threshold.interval;
+        loadedConfig.threshold?.interval ?? config.threshold.interval;
       // Threshold CPU config
       if (loadedConfig.threshold?.cpu) {
         config.threshold.cpu.break =
-          loadedConfig.threshold.cpu.break ?? config.threshold.cpu.break;
+          loadedConfig.threshold.cpu?.break ?? config.threshold.cpu.break;
         config.threshold.cpu.warn =
-          loadedConfig.threshold.cpu.warn ?? config.threshold.cpu.warn;
+          loadedConfig.threshold.cpu?.warn ?? config.threshold.cpu.warn;
       }
       // Threshold Memory config
       if (loadedConfig.threshold?.memory) {
         config.threshold.memory.break =
-          loadedConfig.threshold.memory.break ?? config.threshold.memory.break;
+          loadedConfig.threshold.memory?.break ?? config.threshold.memory.break;
         config.threshold.memory.warn =
-          loadedConfig.threshold.memory.warn ?? config.threshold.memory.warn;
+          loadedConfig.threshold.memory?.warn ?? config.threshold.memory.warn;
       }
     }
     logger.info('Config loaded successfully');

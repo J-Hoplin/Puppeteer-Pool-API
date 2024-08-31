@@ -3,7 +3,7 @@
 **This readme is temporary document**
 
 <p align="center">
-  <img src="./diagram/diagram2.png" alt="Image description">
+  <img src="./diagram/diagram.png" alt="Image description">
 </p>
 
 ## Routes
@@ -40,6 +40,7 @@ If config file are not given or invalid path, manager will use default defined c
     "enablePageCache": false
   },
   "threshold": {
+    "activate": true,
     "interval": 5,
     "cpu": {
       "break": 10,
@@ -69,13 +70,14 @@ If config file are not given or invalid path, manager will use default defined c
 
 ### `threshold`
 
+- `activate`: Activate threshold or not 
 - `interval`: Interval of checking threshold
 - `cpu`
-  - `break`: CPU Usage break point. If CPU Usage is over this value, it will log as `[Danger]`.
-  - `warn`: CPU Usage warning point. If CPU Usage is over this value, it will log as `[Warn]`.
+  - `break`: CPU Usage break point. If CPU Usage is over this value, it will log status and reboot session manager puppeteer.
+  - `warn`: CPU Usage warning point. If CPU Usage is over this value, it will log status.
 - `memory`
-  - `break`: Memory Usage break point. If Memory Usage is over this value, it will log as `[Danger]`.
-  - `warn`: Memory Usage warning point. If Memory Usage is over this value, it will log as `[Warn]`.
+  - `break`: Memory Usage break point. If Memory Usage is over this value, it will log and reboot session manager puppeteer.
+  - `warn`: Memory Usage warning point. If Memory Usage is over this value, it will log status.
 
 ## Puppeteer Pool Manager APIs (`src/pool/manager.ts`)
 
@@ -131,7 +133,7 @@ async function bootstrap() {
    */
 
   // Initialize pool
-  await bootPoolManager();
+  await bootPoolManager({Puppeteer Launch Options},'Puppeteer Pool Config Path');
 
   // Control Session example
   server.post('/', async (req, res) => {

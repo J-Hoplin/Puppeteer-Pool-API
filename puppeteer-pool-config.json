@@ -12,14 +12,15 @@
     "enablePageCache": true
   },
   "threshold": {
+    "activate": true,
     "interval": 5,
     "cpu": {
-      "break": 10,
-      "warn": 5
+      "break": 30,
+      "warn": 20
     },
     "memory": {
-      "break": 300,
-      "warn": 200
+      "break": 600,
+      "warn": 400
     }
   }
 }
