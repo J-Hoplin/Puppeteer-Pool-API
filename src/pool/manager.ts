@@ -5,12 +5,13 @@ import {
 import puppeteer, { Browser, PuppeteerLaunchOptions } from 'puppeteer';
 import { enablePageCaching, ignoreResourceLoading } from './options';
 import genericPool, { Pool } from 'generic-pool';
-import { config } from '../internal/config';
-import { logger } from '../internal/logger';
+import { poolLogger as logger } from './logger';
 import { sessionCallback } from './type';
+import { load } from './config';
 import pidusage from 'pidusage';
 import dayjs from 'dayjs';
 
+let config = null;
 let managerInstance: PuppeteerPoolManager = null;
 
 /**
@@ -20,7 +21,9 @@ let managerInstance: PuppeteerPoolManager = null;
  */
 export async function bootPoolManager(
   puppeteerOptions: PuppeteerLaunchOptions = {},
+  poolConfigPath: string = null,
 ) {
+  config = load(poolConfigPath);
   /**
    * Boot should be boot only once
    */
@@ -136,7 +139,7 @@ class PuppeteerPoolManager {
             logger.error(`${poolAlias} termination failed`);
           }
         }
-        process.exit(0);
+        process.exit(1);
       });
     });
   }
@@ -199,7 +202,7 @@ class PuppeteerPoolManager {
         min: config.session_pool.min,
       },
     );
-    return new SinglePool(poolId, browser, sessionPool);
+    return new SessionPoolManager(poolId, browser, sessionPool);
   }
 
   changeSessionPoolState(id: number, calculation: 'increase' | 'decrease') {
@@ -281,7 +284,16 @@ class PuppeteerPoolManager {
   }
 }
 
-export class SinglePool<T = any> {
+/**
+ *
+ * Session Pool Manager
+ *
+ * Cluster of Raw Session Pool
+ *
+ * Act as interface of Session Pool
+ *
+ */
+export class SessionPoolManager<T = any> {
   constructor(
     private poolId: number,
     private browser: Browser,

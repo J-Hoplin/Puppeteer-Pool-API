@@ -1,12 +1,19 @@
-import { logger } from './logger';
+import { poolLogger as logger } from './logger';
 import * as fs from 'fs';
 
-// Default Config
-export const config = {
-  application: {
-    port: 3000,
-    memory: 1024,
-  },
+/**
+ * Default config path of puppeteer
+ *
+ * Default is 'puppeteer-pool-config.json' from project root path
+ */
+const defaultConfigPath = process.cwd() + '/puppeteer-pool-config.json';
+
+/**
+ * Default Config
+ *
+ * This will be over written if user define own path
+ */
+const config = {
   browser_pool: {
     min: 2,
     max: 5,
@@ -23,16 +30,11 @@ export const config = {
   },
 };
 
-export const load = (configPath: string) => {
+export const load = (configPath: string = null) => {
   try {
-    const loadedConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-    // Appplication Config
-    if (loadedConfig?.application) {
-      config.application.port =
-        loadedConfig?.application?.port ?? config.application.port;
-      config.application.memory =
-        loadedConfig?.application?.memory ?? config.application.memory;
-    }
+    const loadedConfig = JSON.parse(
+      fs.readFileSync(configPath ?? defaultConfigPath, 'utf-8'),
+    );
     // Browser Pool Config
     if (loadedConfig?.browser_pool) {
       config.browser_pool.min =
@@ -62,4 +64,6 @@ export const load = (configPath: string) => {
     // If error while loading config, use default config
     logger.warn('Fail to load config. Use default config');
   }
+
+  return config;
 };
