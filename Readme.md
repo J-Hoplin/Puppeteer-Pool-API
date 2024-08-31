@@ -27,27 +27,27 @@ If config file are not given or invalid path, manager will use default defined c
 {
   "browser_pool": {
     "min": 2,
-            "max": 5,
-            "width": 1080,
-            "height": 1024
+    "max": 5,
+    "width": 1080,
+    "height": 1024
   },
   "session_pool": {
     "min": 1,
-            "max": 5,
-            "width": 1080,
-            "height": 1024,
-            "ignoreResourceLoad": false,
-            "enablePageCache": false
+    "max": 5,
+    "width": 1080,
+    "height": 1024,
+    "ignoreResourceLoad": false,
+    "enablePageCache": false
   },
   "threshold": {
-    "interval": 5, 
-            "cpu": {
+    "interval": 5,
+    "cpu": {
       "break": 10,
-              "warn": 5
+      "warn": 5
     },
     "memory": {
       "break": 300,
-              "warn": 200
+      "warn": 200
     }
   }
 }
@@ -56,7 +56,7 @@ If config file are not given or invalid path, manager will use default defined c
 ### `browser_pool`
 
 - `min`: Minimum pool instance
-- `max`: Maximum pool instance 
+- `max`: Maximum pool instance
 - `width`: Browser width. Also set browser width and height if you need some acts like capturing screen or else.
 - `height`: Browser height. Also set browser width and height if you need some acts like capturing screen or else.
 
@@ -76,7 +76,6 @@ If config file are not given or invalid path, manager will use default defined c
 - `memory`
   - `break`: Memory Usage break point. If Memory Usage is over this value, it will log as `[Danger]`.
   - `warn`: Memory Usage warning point. If Memory Usage is over this value, it will log as `[Warn]`.
-
 
 ## Puppeteer Pool Manager APIs (`src/pool/manager.ts`)
 
