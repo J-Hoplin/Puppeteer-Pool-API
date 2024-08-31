@@ -48,7 +48,7 @@ export const processMetricCheckController: RequestHandler = async (
       v8_external: `${external} GB`,
       cpu_usage: `${cpuUsagePercent.toFixed(2)}%`,
       pool: puppeteerPoolMetrics.map((metrics) => {
-        const id = metrics.Id;
+        const id = `POOL_${metrics.Id}`;
         const cpu = `${metrics.CPU}%`;
         const memory =
           metrics.Memory > 1024
