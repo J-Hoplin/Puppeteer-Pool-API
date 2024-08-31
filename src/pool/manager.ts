@@ -351,7 +351,7 @@ class PuppeteerPoolManager {
     const resource = await this.pools.acquire();
     const singlePool = resource.pool;
     // Directly release Root Pool for handling next session pool
-    await this.pools.release(resource);
+    this.pools.release(resource);
     let isSuccess = true;
     let exception = null;
     let callbackReturn = null;

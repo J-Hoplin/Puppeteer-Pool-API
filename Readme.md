@@ -70,7 +70,7 @@ If config file are not given or invalid path, manager will use default defined c
 
 ### `threshold`
 
-- `activate`: Activate threshold or not 
+- `activate`: Activate threshold or not
 - `interval`: Interval of checking threshold
 - `cpu`
   - `break`: CPU Usage break point. If CPU Usage is over this value, it will log status and reboot session manager puppeteer.
