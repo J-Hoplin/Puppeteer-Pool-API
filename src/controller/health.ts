@@ -1,4 +1,4 @@
-import { getPoolMetrics } from '../pool/manager';
+import { getPoolMetrics } from '@hoplin/puppeteer-pool';
 import { responseFn } from '../common/response';
 import { RequestHandler } from 'express';
 import * as process from 'node:process';

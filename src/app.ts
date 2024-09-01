@@ -1,4 +1,4 @@
-import { bootPoolManager, controlSession } from './pool/manager';
+import { bootPoolManager, controlSession } from '@hoplin/puppeteer-pool';
 import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
 import express, { Application } from 'express';

@@ -173,6 +173,20 @@
   resolved "https://registry.yarnpkg.com/@eslint/object-schema/-/object-schema-2.1.4.tgz#9e69f8bb4031e11df79e03db09f9dbbae1740843"
   integrity sha512-BsWiH1yFGjXXS2yvrf5LyuoSIIbPrGUWob917o+BTKuZ7qJdxX8aJLRxs1fS9n6r7vESrq1OUqb68dANcFXuQQ==
 
+"@hoplin/puppeteer-pool@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@hoplin/puppeteer-pool/-/puppeteer-pool-1.0.1.tgz#df9f0f134c640106e5e5755760deab849639df4e"
+  integrity sha512-49fwVOlRjLdCdEpwGTN9lw5VpVP8yKORlto2ijit11lCi3UUNyGCdrFI/CJ7Vle26lAOaZdpPBLQ42AJR/D8Kg==
+  dependencies:
+    "@types/pino" "^7.0.5"
+    "@types/pino-pretty" "^5.0.0"
+    dayjs "^1.11.13"
+    generic-pool "^3.9.0"
+    pidusage "^3.0.2"
+    pino "^9.3.2"
+    pino-pretty "^11.2.2"
+    puppeteer "^23.1.1"
+
 "@humanwhocodes/module-importer@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/module-importer/-/module-importer-1.0.1.tgz#af5b2691a22b44be847b0ca81641c5fb6ad0172c"
@@ -330,11 +344,6 @@
   integrity sha512-DkFrJOe+rfdHTqqMg0bSNlGlQ85hSoh2TPzZyhHsXnMtligRWpxUySiyw8FY14ITt24HVCiQPWxS3KO/QlGmWg==
   dependencies:
     undici-types "~6.19.2"
-
-"@types/pidusage@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@types/pidusage/-/pidusage-2.0.5.tgz#ec8477720e390b78e3d88b7b522d9e2d4c7995a8"
-  integrity sha512-MIiyZI4/MK9UGUXWt0jJcCZhVw7YdhBuTOuqP/BjuLDLZ2PmmViMIQgZiWxtaMicQfAz/kMrZ5T7PKxFSkTeUA==
 
 "@types/pino-pretty@^5.0.0":
   version "5.0.0"
