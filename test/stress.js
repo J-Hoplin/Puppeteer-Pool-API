@@ -9,7 +9,7 @@ export const options = {
 
 export default function () {
   const payload = JSON.stringify({
-    url: 'URL for test',
+    url: 'URL',
   });
   const params = {
     headers: {
@@ -17,6 +17,6 @@ export default function () {
     },
   };
 
-  http.post('http://127.0.0.1:5200', payload, params);
+  http.post('http://127.0.0.1:3000', payload, params);
   sleep(1);
 }
