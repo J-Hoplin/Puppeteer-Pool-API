@@ -173,14 +173,13 @@
   resolved "https://registry.yarnpkg.com/@eslint/object-schema/-/object-schema-2.1.4.tgz#9e69f8bb4031e11df79e03db09f9dbbae1740843"
   integrity sha512-BsWiH1yFGjXXS2yvrf5LyuoSIIbPrGUWob917o+BTKuZ7qJdxX8aJLRxs1fS9n6r7vESrq1OUqb68dANcFXuQQ==
 
-"@hoplin/puppeteer-pool@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@hoplin/puppeteer-pool/-/puppeteer-pool-1.0.1.tgz#df9f0f134c640106e5e5755760deab849639df4e"
-  integrity sha512-49fwVOlRjLdCdEpwGTN9lw5VpVP8yKORlto2ijit11lCi3UUNyGCdrFI/CJ7Vle26lAOaZdpPBLQ42AJR/D8Kg==
+"@hoplin/puppeteer-pool@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@hoplin/puppeteer-pool/-/puppeteer-pool-1.1.1.tgz#24f2d7126ea3d0ae8fa7fef7f0c4e8d2096c9abe"
+  integrity sha512-Rq0SAJeywQ13aVLHMBSDOA4X2CbDZ3J0EWZeM2Owrrvd1IjZENfkg8ccKb+sskuryMBUi2bAU0U+wUGCgXbSlg==
   dependencies:
     "@types/pino" "^7.0.5"
     "@types/pino-pretty" "^5.0.0"
-    dayjs "^1.11.13"
     generic-pool "^3.9.0"
     pidusage "^3.0.2"
     pino "^9.3.2"

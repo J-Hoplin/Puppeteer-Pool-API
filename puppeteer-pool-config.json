@@ -1,7 +1,7 @@
 {
   "browser_pool": {
     "min": 2,
-    "max": 5
+    "max": 3
   },
   "session_pool": {
     "min": 10,
@@ -13,14 +13,14 @@
   },
   "threshold": {
     "activate": true,
-    "interval": 5,
+    "interval": 10,
     "cpu": {
       "break": 30,
       "warn": 20
     },
     "memory": {
-      "break": 600,
-      "warn": 400
+      "break": 500,
+      "warn": 200
     }
   }
 }
