@@ -8,6 +8,7 @@
     "@hoplin/puppeteer-pool": "^1.1.1",
     "@types/pino": "^7.0.5",
     "@types/pino-pretty": "^5.0.0",
+    "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/cors": "^2.8.17",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.0",

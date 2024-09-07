@@ -1,8 +1,9 @@
+import express, { Application, NextFunction, Request, Response } from 'express';
 import { bootPoolManager, controlSession } from '@hoplin/puppeteer-pool';
 import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
-import express, { Application } from 'express';
 import router from './routes';
+const cors = require('cors');
 
 async function bootstrap() {
   // Initialize pool
@@ -11,7 +12,9 @@ async function bootstrap() {
   const server: Application = express();
 
   // Base Middleware
+  // CORS default allow origin all ('*')
   server.use(
+    cors(),
     express.json(),
     express.urlencoded({ extended: true }),
     loggerMiddleware,
@@ -28,6 +31,10 @@ async function bootstrap() {
   });
 
   server.use(router);
+
+  server.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    return res.status(500).json({ error: err.message });
+  });
 
   startServer(server);
 }
