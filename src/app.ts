@@ -27,18 +27,20 @@ async function bootstrap() {
     const url = req.body.url;
     const htmlContent = await controlSession(async (session) => {
       await session.goto(url, {
-        waitUntil: 'load',
+        waitUntil: 'networkidle0',
       });
 
-      const content = await session.evaluate(() => {
-        const title = document.title;
-        const body = document.querySelector('body').innerText;
-        return {
-          title,
-          body,
-        };
+      const body = await session.evaluate(() => {
+        return document.body.innerText.replace(/[\n\t\r]+/g, ' ').trim();
       });
-      return content;
+      const title = await session.evaluate(() => {
+        const title = document.title;
+        return title;
+      });
+      return {
+        body,
+        title,
+      };
     });
     return res.status(200).json({ result: htmlContent });
   });
