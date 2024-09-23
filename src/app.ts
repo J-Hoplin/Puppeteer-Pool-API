@@ -7,7 +7,10 @@ const cors = require('cors');
 
 async function bootstrap() {
   // Initialize pool
-  await bootPoolManager({ args: ['--no-sandbox'] });
+  await bootPoolManager({
+    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
+    executablePath: '/usr/bin/chromium-browser',
+  });
 
   const server: Application = express();
 
