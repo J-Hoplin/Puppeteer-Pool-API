@@ -26,7 +26,9 @@ async function bootstrap() {
   server.post('/', async (req, res) => {
     const url = req.body.url;
     const htmlContent = await controlSession(async (session) => {
-      await session.goto(url);
+      await session.goto(url, {
+        waitUntil: 'domcontentloaded',
+      });
 
       const content = await session.evaluate(() => {
         const title = document.title;
