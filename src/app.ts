@@ -27,7 +27,7 @@ async function bootstrap() {
     const url = req.body.url;
     const htmlContent = await controlSession(async (session) => {
       await session.goto(url, {
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'load',
       });
 
       const content = await session.evaluate(() => {
