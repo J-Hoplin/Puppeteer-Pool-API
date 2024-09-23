@@ -7,7 +7,7 @@ const cors = require('cors');
 
 async function bootstrap() {
   // Initialize pool
-  await bootPoolManager();
+  await bootPoolManager({ args: ['--no-sandbox'] });
 
   const server: Application = express();
 
@@ -25,7 +25,15 @@ async function bootstrap() {
     const htmlContent = await controlSession(async (session) => {
       await session.goto(url);
 
-      return await session.content();
+      const content = await session.evaluate(() => {
+        const title = document.title;
+        const body = document.querySelector('body').innerText;
+        return {
+          title,
+          body,
+        };
+      });
+      return content;
     });
     return res.status(200).json({ result: htmlContent });
   });
