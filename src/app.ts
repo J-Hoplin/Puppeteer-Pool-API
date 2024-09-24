@@ -20,6 +20,7 @@ async function bootstrap() {
       '--disable-extensions',
       '--disable-sync',
       '--disable-translate',
+      '--js-flags="--max-old-space-size=2048"',
     ],
     executablePath: '/usr/bin/chromium-browser',
   });
