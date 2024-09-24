@@ -25,29 +25,35 @@ async function bootstrap() {
 
   server.post('/', async (req, res) => {
     const url = req.body.url;
-    const htmlContent = await controlSession(async (session) => {
-      await session.goto(url, {
-        waitUntil: 'networkidle0',
-      });
+    try {
+      const htmlContent = await controlSession(async (session) => {
+        await session.goto(url, {
+          waitUntil: 'networkidle0',
+        });
 
-      const body = await session.evaluate(() => {
-        return document.body.innerText.replace(/[\n\t\r]+/g, ' ').trim();
+        const body = await session.evaluate(() => {
+          return document.body.innerText.replace(/[\n\t\r]+/g, ' ').trim();
+        });
+        const title = await session.evaluate(() => {
+          const title = document.title;
+          return title;
+        });
+        const ogImage = await session.evaluate(() => {
+          const ogImageMeta = document.querySelector(
+            'meta[property="og:image"]',
+          );
+          return ogImageMeta ? ogImageMeta['content'] : null;
+        });
+        return {
+          body,
+          title,
+          ogImage,
+        };
       });
-      const title = await session.evaluate(() => {
-        const title = document.title;
-        return title;
-      });
-      const ogImage = await session.evaluate(() => {
-        const ogImageMeta = document.querySelector('meta[property="og:image"]');
-        return ogImageMeta ? ogImageMeta['content'] : null;
-      });
-      return {
-        body,
-        title,
-        ogImage,
-      };
-    });
-    return res.status(200).json({ result: htmlContent });
+      return res.status(200).json({ result: htmlContent });
+    } catch (err) {
+      return res.status(500).json({ result: 'Fail to get URL' });
+    }
   });
 
   server.use(router);
