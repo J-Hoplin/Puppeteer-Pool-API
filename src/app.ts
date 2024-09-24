@@ -7,10 +7,7 @@ const cors = require('cors');
 
 async function bootstrap() {
   // Initialize pool
-  await bootPoolManager({
-    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
-    executablePath: '/usr/bin/chromium-browser',
-  });
+  await bootPoolManager();
 
   const server: Application = express();
 
@@ -37,9 +34,14 @@ async function bootstrap() {
         const title = document.title;
         return title;
       });
+      const ogImage = await session.evaluate(() => {
+        const ogImageMeta = document.querySelector('meta[property="og:image"]');
+        return ogImageMeta ? ogImageMeta['content'] : null;
+      });
       return {
         body,
         title,
+        ogImage,
       };
     });
     return res.status(200).json({ result: htmlContent });
