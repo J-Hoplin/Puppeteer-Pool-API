@@ -2,6 +2,7 @@ import express, { Application, NextFunction, Request, Response } from 'express';
 import { bootPoolManager, controlSession } from '@hoplin/puppeteer-pool';
 import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
+import puppeteer from 'puppeteer';
 import router from './routes';
 const cors = require('cors');
 
@@ -22,7 +23,7 @@ async function bootstrap() {
       '--disable-translate',
       '--js-flags="--max-old-space-size=2048"',
     ],
-    executablePath: '/usr/bin/chromium-browser',
+    executablePath: puppeteer.executablePath(),
   });
 
   const server: Application = express();
