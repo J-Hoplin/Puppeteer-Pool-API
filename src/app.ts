@@ -8,7 +8,19 @@ const cors = require('cors');
 async function bootstrap() {
   // Initialize pool
   await bootPoolManager({
-    args: ['--no-sandbox', '--disable-gpu', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox',
+      '--disable-gpu',
+      '--disable-setuid-sandbox',
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--disable-dev-shm-usage',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--disable-extensions',
+      '--disable-sync',
+      '--disable-translate',
+    ],
     executablePath: '/usr/bin/chromium-browser',
   });
 
