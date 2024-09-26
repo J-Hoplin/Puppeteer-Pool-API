@@ -173,10 +173,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/object-schema/-/object-schema-2.1.4.tgz#9e69f8bb4031e11df79e03db09f9dbbae1740843"
   integrity sha512-BsWiH1yFGjXXS2yvrf5LyuoSIIbPrGUWob917o+BTKuZ7qJdxX8aJLRxs1fS9n6r7vESrq1OUqb68dANcFXuQQ==
 
-"@hoplin/puppeteer-pool@^1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@hoplin/puppeteer-pool/-/puppeteer-pool-1.1.3.tgz#27265d90676f44d197c8af3e9056a206ddbd8c79"
-  integrity sha512-s8L7ZZg5qs8j+MMIVe4BVzU7T0yR1i4Sz3IedZ8amAglMRl2rC8VFvRyipxLo+i65NPJaxUp8zfrmU+3hwYuYA==
+"@hoplin/puppeteer-pool@^1.1.4-alpha":
+  version "1.1.4-alpha"
+  resolved "https://registry.yarnpkg.com/@hoplin/puppeteer-pool/-/puppeteer-pool-1.1.4-alpha.tgz#0f90c0889d84fed5a85b703db8900a01e3dd89a8"
+  integrity sha512-PliSiGj4X9v+AEhiqVPvZNntpwPlIZfXDyNW9xf52abp7qY7jVILCttuVdjUWLZ8xHf8dJWGRZEqbGeqGJtUrw==
   dependencies:
     "@types/pino" "^7.0.5"
     "@types/pino-pretty" "^5.0.0"

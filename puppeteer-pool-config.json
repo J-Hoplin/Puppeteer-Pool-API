@@ -15,12 +15,12 @@
     "activate": true,
     "interval": 10,
     "cpu": {
-      "break": 30,
-      "warn": 20
+      "break": 90,
+      "warn": 60
     },
     "memory": {
-      "break": 500,
-      "warn": 200
+      "break": 2048,
+      "warn": 900
     }
   }
 }

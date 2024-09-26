@@ -1,5 +1,9 @@
+import {
+  bootPoolManager,
+  controlSession,
+  SessionCallbackException,
+} from '@hoplin/puppeteer-pool';
 import express, { Application, NextFunction, Request, Response } from 'express';
-import { bootPoolManager, controlSession } from '@hoplin/puppeteer-pool';
 import { loggerMiddleware } from './internal/logger';
 import { startServer } from './internal/process';
 import router from './routes';
@@ -64,6 +68,9 @@ async function bootstrap() {
       });
       return res.status(200).json({ result: htmlContent });
     } catch (err) {
+      if (err instanceof SessionCallbackException) {
+        return res.status(500).json({ result: 'Session timeout' });
+      }
       return res.status(500).json({ result: 'Fail to get URL' });
     }
   });
