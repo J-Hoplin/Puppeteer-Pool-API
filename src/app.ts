@@ -24,7 +24,6 @@ async function bootstrap() {
       '--disable-extensions',
       '--disable-sync',
       '--disable-translate',
-      '--js-flags="--max-old-space-size=2048"',
     ],
   });
 

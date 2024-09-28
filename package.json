@@ -5,7 +5,7 @@
   "repository": "https://github.com/J-Hoplin/Puppeteer-Thread-Pool.git",
   "license": "MIT",
   "dependencies": {
-    "@hoplin/puppeteer-pool": "^1.1.4-alpha",
+    "@hoplin/puppeteer-pool": "^1.1.5",
     "@types/pino": "^7.0.5",
     "@types/pino-pretty": "^5.0.0",
     "cors": "^2.8.5",
